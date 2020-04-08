@@ -1,0 +1,7 @@
+include activation_dash_component/activation_dash_component.min.js
+include activation_dash_component/activation_dash_component.min.js.map
+include activation_dash_component/metadata.json
+include activation_dash_component/package-info.json
+include README.md
+include LICENSE
+include package.json

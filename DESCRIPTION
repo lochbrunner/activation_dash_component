@@ -1,0 +1,15 @@
+Package: activationDashComponent
+Title: Displays a activation layer
+Version: 0.0.1
+Authors @R: as.person(c(Matthias Lochbrunner <matthias_lochbrunner@web.de>))
+Description: Displays a activation layer
+Depends: R (>= 3.0.2)
+Imports: 
+Suggests: 
+License: MIT + file LICENSE
+URL: https://github.com/https://github.com/lochbrunner/activation_dash_component/activation-dash-component
+BugReports: https://github.com/https://github.com/lochbrunner/activation_dash_component/activation-dash-component/issues
+Encoding: UTF-8
+LazyData: true
+Author: Matthias Lochbrunner [aut]
+Maintainer: Matthias Lochbrunner <matthias_lochbrunner@web.de>
