@@ -1,5 +1,6 @@
 node_modules
-activation_dash_component
+activation_dash_component/*
+!activation_dash_component/*_.py
 inst
 venv
 man

@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from activation_dash_component import ActivationDashComponent
+import activation_dash_component
 import dash
 from dash.dependencies import Input, Output
 import dash_html_components as html
@@ -11,8 +11,10 @@ app = dash.Dash(__name__)
 
 labels = [f'\\sqrt{{{i}}}' for i in range(10)]
 
+print(activation_dash_component.package_name)
+
 app.layout = html.Div([
-    ActivationDashComponent.ActivationDashComponent(
+    activation_dash_component.ActivationDashComponent(
         id='activations',
         values=np.random.rand(10, 10),
         xlabel=labels,
