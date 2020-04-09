@@ -1,16 +1,24 @@
-import PropTypes from 'prop-types';
-import {intersection} from 'ramda';
-import React, {Component} from 'react';
+import 'katex/dist/katex.min.css';
+import './style.scss';
 
+import PropTypes from 'prop-types';
+import React, {Component} from 'react';
+import {InlineMath} from 'react-katex';
 
 function create_dummy_values() {
   return Array.apply(null, new Array(10))
-      .map(_ => Array.apply(null, new Array(10)).map(_ => Math.random()))
+      .map(_ => Array.apply(null, new Array(10)).map(_ => Math.random()));
+}
+
+function create_dummy_labels(n) {
+  return Array.apply(null, new Array(10))
+      .map((_, i) => `\\frac{${i}+${n}}{${i + n}}`);
 }
 
 function encode_color(value, min, max) {
   const v = (value - min) / (max - min) * 255;
-  return `rgb(${v}, ${v}, ${v})`
+  const s = v.toFixed(2);
+  return `rgb(${s}, ${s}, ${s})`;
 }
 /**
  * ExampleComponent is an example component.
@@ -21,8 +29,10 @@ function encode_color(value, min, max) {
  */
 export default class ActivationDashComponent extends Component {
   render() {
-    let {id, label, values} = this.props;
+    let {id, xlabel, ylabel, values} = this.props;
     values = values || create_dummy_values();
+    xlabel = xlabel || create_dummy_labels(3);
+    ylabel = ylabel || create_dummy_labels(5);
 
     const WIDTH = 100;
     const HEIGHT = 100;
@@ -32,16 +42,27 @@ export default class ActivationDashComponent extends Component {
     const row = (values, i) => values.map(
         (value, j) =>
             <rect key = {`${i}-${j}`} x = {j* dx} y = {i* dy} width =
-                 {dx} height = {dy} fill = {encode_color(value, 0, 1)}>
-        <title>{value}</title>
+                 {dx + 0.1} height = {dy + 0.1} fill = {encode_color(
+                     value, 0, 1)}><title>{value}</title>
           </rect>);
 
-    const cells = values.map(row)
+    const cells = values.map(row);
+    xlabel = xlabel.map((l, i) => <div key = {i}><InlineMath math = {
+                          l
+                        } /></div>);
+
+    ylabel = ylabel.map((l, i) => <div key = {i}><InlineMath math = {
+                          l
+                        } /></div>);
 
 
-    return (<div id = {id}>
-            <svg width = '100%' height = '100%' viewBox = {
-                 `0 0 ${WIDTH} ${HEIGHT}`}>{cells}</svg>
+    return (
+        <div id = {id} className = 'activation-dash'>
+        <div className = {'x-label'}>{xlabel}</div>
+        <svg preserveAspectRatio = 'none' width = '100%' height =
+             '100%' viewBox = {`0 0 ${WIDTH} ${HEIGHT}`}>{
+            cells}</svg>
+        <div className = {'y-label'}>{ylabel}</div>
         </div>);
   }
 }
@@ -57,12 +78,13 @@ ActivationDashComponent.propTypes = {
   /**
    * A label that will be printed when this component is rendered.
    */
-  label: PropTypes.string.isRequired,
+  xlabel: PropTypes.array,
+  ylabel: PropTypes.array,
 
   /**
    * The value displayed in the input.
    */
-  values: PropTypes.array,
+  values: PropTypes.array.isRequired,
 
   /**
    * Dash-assigned callback that should be called to report property changes
