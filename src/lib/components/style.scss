@@ -42,5 +42,10 @@
     >svg {
         grid-row: 1;
         grid-column: 2;
+
+        .marking {
+            stroke: rgb(255,0,0);
+            stroke-width: 0.3;
+        }
     }
 }

@@ -1,7 +1,7 @@
 import 'katex/dist/katex.min.css';
 import './style.scss';
 
-import PropTypes from 'prop-types';
+import PropTypes, {func} from 'prop-types';
 import React, {Component} from 'react';
 import {InlineMath} from 'react-katex';
 
@@ -13,6 +13,10 @@ function create_dummy_values() {
 function create_dummy_labels(n) {
   return Array.apply(null, new Array(10))
       .map((_, i) => `\\frac{${i}+${n}}{${i + n}}`);
+}
+
+function create_dummy_markings() {
+  return [[3, 5], [2, 8]];
 }
 
 function encode_color(value, min, max) {
@@ -29,10 +33,11 @@ function encode_color(value, min, max) {
  */
 export default class ActivationDashComponent extends Component {
   render() {
-    let {id, xlabel, ylabel, values} = this.props;
+    let {id, xlabel, ylabel, values, markings} = this.props;
     values = values || create_dummy_values();
     xlabel = xlabel || create_dummy_labels(3);
     ylabel = ylabel || create_dummy_labels(5);
+    markings = markings || create_dummy_markings();
 
     const WIDTH = 100;
     const HEIGHT = 100;
@@ -47,21 +52,30 @@ export default class ActivationDashComponent extends Component {
           </rect>);
 
     const cells = values.map(row);
-    xlabel = xlabel.map((l, i) => <div key = {i}><InlineMath math = {
-                          l
-                        } /></div>);
-
     ylabel = ylabel.map((l, i) => <div key = {i}><InlineMath math = {
                           l
                         } /></div>);
 
+    xlabel = xlabel.map((l, i) => <div key = {i}><InlineMath math = {
+                          l
+                        } /></div>);
+
+    const marking = ([x, y]) =>
+        < rect x = {x* dx} y = {y* dy} width = {dx +
+                                                0.1} height = {dy +
+                                                               0.1} className =
+    { 'marking' } />;
+    markings = markings.map(marking);
+
 
     return (
         <div id = {id} className = 'activation-dash'>
-        <div className = {'x-label'}>{xlabel}</div>
+        <div className = {'x-label'}>{xlabel}<
+            /div>
         <svg preserveAspectRatio = 'none' width = '100%' height =
              '100%' viewBox = {`0 0 ${WIDTH} ${HEIGHT}`}>{
-            cells}</svg>
+            cells}
+            {markings}</svg>
         <div className = {'y-label'}>{ylabel}</div>
         </div>);
   }
@@ -85,6 +99,8 @@ ActivationDashComponent.propTypes = {
    * The value displayed in the input.
    */
   values: PropTypes.array.isRequired,
+
+  markings: PropTypes.array,
 
   /**
    * Dash-assigned callback that should be called to report property changes

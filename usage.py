@@ -18,7 +18,8 @@ app.layout = html.Div([
         id='activations',
         values=np.random.rand(10, 10),
         xlabel=labels,
-        ylabel=labels
+        ylabel=labels,
+        markings=[[3, 5], [2, 8]],
     ),
     html.Div(id='output')
 ])
