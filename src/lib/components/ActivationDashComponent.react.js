@@ -32,13 +32,25 @@ function encode_color(value, min, max) {
  * which is editable by the user.
  */
 export default class ActivationDashComponent extends Component {
-  render() {
-    let {id, xlabel, ylabel, values, markings} = this.props;
-    values = values || create_dummy_values();
-    xlabel = xlabel || create_dummy_labels(3);
-    ylabel = ylabel || create_dummy_labels(5);
-    markings = markings || create_dummy_markings();
+  constructor(props) {
+    super(props);
+    this.state({svg: {width: undefined, height: undefined}});
+  }
 
+
+
+  render() {
+    let {id, xlabel, ylabel, values, markings, data} = this.props;
+    values = values || (data && data.values) || create_dummy_values();
+    xlabel = xlabel || (data && data.xlabel) || create_dummy_labels(3);
+    ylabel = ylabel || (data && data.ylabel) || create_dummy_labels(5);
+    markings = markings || (data && data.markings) || create_dummy_markings();
+
+    const min_value =
+        values.reduce((p, v) => Math.min(p, ...v), Number.MAX_VALUE);
+    const max_value =
+        values.reduce((p, v) => Math.max(p, ...v), Number.MIN_VALUE);
+    console.info(`min: ${min_value} max: ${max_value}`);
     const WIDTH = 100;
     const HEIGHT = 100;
     const dx = WIDTH / values[0].length;
@@ -48,7 +60,8 @@ export default class ActivationDashComponent extends Component {
         (value, j) =>
             <rect key = {`${i}-${j}`} x = {j* dx} y = {i* dy} width =
                  {dx + 0.1} height = {dy + 0.1} fill = {encode_color(
-                     value, 0, 1)}><title>{value}</title>
+                     value, min_value, max_value)}>
+        <title>{value}</title>
           </rect>);
 
     const cells = values.map(row);
@@ -61,17 +74,14 @@ export default class ActivationDashComponent extends Component {
                         } /></div>);
 
     const marking = ([x, y]) =>
-        < rect x = {x* dx} y = {y* dy} width = {dx +
-                                                0.1} height = {dy +
-                                                               0.1} className =
-    { 'marking' } />;
+        <rect x = {x* dx} y = {y* dy}
+          width = {dx +0.1} height = {dy +0.1} className={'marking'} />;
     markings = markings.map(marking);
 
 
     return (
         <div id = {id} className = 'activation-dash'>
-        <div className = {'x-label'}>{xlabel}<
-            /div>
+        <div className = {'x-label'}>{xlabel}</div>
         <svg preserveAspectRatio = 'none' width = '100%' height =
              '100%' viewBox = {`0 0 ${WIDTH} ${HEIGHT}`}>{
             cells}
@@ -90,17 +100,28 @@ ActivationDashComponent.propTypes = {
   id: PropTypes.string,
 
   /**
-   * A label that will be printed when this component is rendered.
+   * LaTeX labels for x axis
    */
   xlabel: PropTypes.array,
+  /**
+   * LaTeX labels for y axis
+   */
   ylabel: PropTypes.array,
 
   /**
    * The value displayed in the input.
    */
-  values: PropTypes.array.isRequired,
+  values: PropTypes.array,
 
+  /**
+   * Cell to be marked
+   */
   markings: PropTypes.array,
+
+  /**
+   * All props combined in one dictionary
+   */
+  data: PropTypes.object,
 
   /**
    * Dash-assigned callback that should be called to report property changes
