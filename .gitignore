@@ -2,4 +2,6 @@ node_modules
 activation_dash_component
 inst
 venv
+man
+R
 *.pyc
