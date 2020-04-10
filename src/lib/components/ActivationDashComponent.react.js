@@ -1,7 +1,9 @@
 import 'katex/dist/katex.min.css';
+import 'rc-slider/assets/index.css';
 import './style.scss';
 
 import PropTypes, {func} from 'prop-types';
+import Slider, {Range} from 'rc-slider';
 import React, {Component} from 'react';
 import {InlineMath} from 'react-katex';
 
@@ -24,9 +26,9 @@ function create_dummy_markings() {
   return [[3, 5], [2, 8]];
 }
 
-function encode_color(value, min, max) {
+function encode_color(value, min, max, exponent) {
   const v = (value - min) / (max - min);
-  const v1 = (v * 255).toFixed(2);
+  const v1 = (Math.pow(v, exponent) * 255).toFixed(2);
   // const v5 = (v * v * v * v * v * 255).toFixed(2);
   // const v3 = (v * v * v * 255).toFixed(2);
   return `rgb(${v1}, ${v1}, ${v1})`;
@@ -41,7 +43,7 @@ function encode_color(value, min, max) {
 export default class ActivationDashComponent extends Component {
   constructor(props) {
     super(props);
-    this.state = {svg: {width: undefined, height: undefined}};
+    this.state = {svg: {width: undefined, height: undefined}, colorScale: 1};
   }
 
   updateSize(element) {
@@ -50,7 +52,17 @@ export default class ActivationDashComponent extends Component {
     if (old.width !== element.clientWidth ||
         old.height !== element.clientHeight) {
       this.setState(
-          {svg: {width: element.clientWidth, height: element.clientHeight}});
+          prevState => ({
+            ...prevState,
+            svg: {width: element.clientWidth, height: element.clientHeight}
+          }));
+    }
+  }
+
+  updateColorScale(value) {
+    // console.info(value)
+    if (this.state.colorScale !== value) {
+      this.setState(prevState => ({...prevState, colorScale: value}));
     }
   }
 
@@ -78,11 +90,12 @@ export default class ActivationDashComponent extends Component {
         (value, j) =>
             <rect key = {`${i}-${j}`} x = {(j * dx).toFixed(
                  2)} y = {(i * dy).toFixed(2)} width = {dx + 0.5} height =
-                 {dy + 0.5} fill = {encode_color(value, min_value, max_value)}>
+                 {dy + 0.5} fill = {encode_color(
+                     value, min_value, max_value, this.state.colorScale)}>
         <title>{value.toFixed(precision)}</title>
           </rect>);
 
-    const Y_LABEL_WIDTH = -dx * 0.9;
+    const Y_LABEL_WIDTH = -dx * 0.4;
 
     const cells = values.map(row);
     x_label =
@@ -114,7 +127,11 @@ export default class ActivationDashComponent extends Component {
              'none' height = '100%'>{cells} {
             markings}</svg>
         <div className = {'y-label'}>{y_label}</div>
-        <div className = {'x-label'}>{x_label}</div>
+        <div className = {'x-label'}>{x_label}<
+            /div>
+        <div className={'side-menu'}>
+            <Slider className={'color-scale'} vertical={true} onChange={this.updateColorScale.bind(this)} min={1} max={10}/>
+        </div>
         </div>);
   }
 }

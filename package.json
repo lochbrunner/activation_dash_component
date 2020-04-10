@@ -1,6 +1,6 @@
 {
   "name": "activation_dash_component",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Displays a activation layer",
   "repository": {
     "type": "git",
@@ -25,6 +25,7 @@
   "license": "MIT",
   "dependencies": {
     "ramda": "^0.26.1",
+    "rc-slider": "^9.2.4",
     "react-katex": "^2.0.2"
   },
   "devDependencies": {

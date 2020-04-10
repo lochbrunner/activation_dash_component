@@ -1,5 +1,7 @@
 
 $x-label-height: 50px;
+$y-label-width: 10px;
+$side-menu-width: 50px;
 
 .activation-dash{
     height: 100%;
@@ -14,7 +16,7 @@ $x-label-height: 50px;
     .y-label {
         grid-row: 1;
         grid-column: 1;
-
+        
         position: absolute;
         top:0;
         bottom: $x-label-height;
@@ -33,10 +35,11 @@ $x-label-height: 50px;
     .x-label{
         grid-row: 2;
         grid-column: 2;
-        
+        width: calc(100% - #{$y-label-width} - #{$side-menu-width});
         
         >div {
             position: absolute;
+            right: $side-menu-width;
 
             >span {
                 text-align: right;
@@ -54,14 +57,31 @@ $x-label-height: 50px;
         grid-column: 2;
         position: absolute;
         top:0;
+        right: $side-menu-width;
         bottom: $x-label-height;
         height: calc(100% - #{$x-label-height});
-        width: 100%;
+        width: calc(100% - #{$y-label-width} - #{$side-menu-width});
 
         .marking {
             stroke: rgb(255,0,0);
             stroke-width: 2;
             fill: transparent;
+        }
+    }
+
+    >.side-menu{
+        position: absolute;
+        right: 0;
+        height: 100%;
+        width: $side-menu-width;
+
+        .color-scale {
+            position: absolute;
+            right: 50%;
+            right: 50%;
+
+            height: 60%;
+            margin-top: 30px;
         }
     }
 }
