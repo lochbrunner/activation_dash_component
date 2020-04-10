@@ -8,7 +8,7 @@
     display:grid;
 
 
-    .x-label {
+    .y-label {
         grid-row: 1;
         grid-column: 1;
 
@@ -24,7 +24,7 @@
         }
     }
 
-    .y-label{
+    .x-label{
         grid-row: 2;
         grid-column: 2;
         
@@ -47,7 +47,7 @@
 
         .marking {
             stroke: rgb(255,0,0);
-            stroke-width: 0.3;
+            stroke-width: 2;
         }
     }
 }
