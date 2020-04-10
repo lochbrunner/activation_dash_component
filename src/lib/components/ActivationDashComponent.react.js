@@ -82,8 +82,12 @@ export default class ActivationDashComponent extends Component {
         <title>{value.toFixed(precision)}</title>
           </rect>);
 
+    const Y_LABEL_WIDTH = 50 + dx / 2;
+
     const cells = values.map(row);
-    x_label = x_label.map((l, i) => <div key = {i}><InlineMath math = {
+    x_label = x_label.map((l, i) => <div style = {
+                            { left: `${i * dx * 0.87 + Y_LABEL_WIDTH}px` }
+                          } key = {i}><InlineMath math = {
                             l
                           } /></div>);
 
@@ -102,7 +106,7 @@ export default class ActivationDashComponent extends Component {
         <div id = {id} className = 'activation-dash'>
         <div className = {'y-label'}>{y_label}<
             /div>
-        <svg ref={this.updateSize.bind(this)} preserveAspectRatio = 'none' width = '100%' height =
+        <svg ref={this.updateSize.bind(this)} preserveAspectRatio = 'none' height =
              '100%'>{
             cells}
             {markings}</svg>
