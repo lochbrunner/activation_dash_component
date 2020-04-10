@@ -10,9 +10,14 @@ function create_dummy_values() {
       .map(_ => Array.apply(null, new Array(10)).map(_ => Math.random()));
 }
 
-function create_dummy_labels(n) {
+function create_dummy_labels_y(n) {
   return Array.apply(null, new Array(10))
       .map((_, i) => `\\frac{${i}+${n}}{${i + n}}`);
+}
+
+function create_dummy_labels_x(n) {
+  return Array.apply(null, new Array(10))
+      .map((_, i) => `\\frac{${[...Array(i + 1).keys()].join('+')}}{${i + n}}`);
 }
 
 function create_dummy_markings() {
@@ -50,10 +55,11 @@ export default class ActivationDashComponent extends Component {
 
 
   render() {
-    let {id, xlabel, ylabel, values, markings, data} = this.props;
+    let {id, xlabel, ylabel, values, markings, precision, data} = this.props;
     values = values || (data && data.values) || create_dummy_values();
-    x_label = xlabel || (data && data.xlabel) || create_dummy_labels(3);
-    y_label = ylabel || (data && data.ylabel) || create_dummy_labels(5);
+    let x_label = xlabel || (data && data.xlabel) || create_dummy_labels_x(3);
+    let y_label = ylabel || (data && data.ylabel) || create_dummy_labels_y(5);
+    precision = precision || (data && data.precision) || 3;
     markings = markings || (data && data.markings) || create_dummy_markings();
     const {svg} = this.state;
     console.log(`svg: ${svg.width}x${svg.height}`);
@@ -73,27 +79,29 @@ export default class ActivationDashComponent extends Component {
             <rect key = {`${i}-${j}`} x = {j* dx} y = {i* dy} width =
                  {dx + 0.5} height = {dy + 0.5} fill = {encode_color(
                      value, min_value, max_value)}>
-        <title>{value}</title>
+        <title>{value.toFixed(precision)}</title>
           </rect>);
 
     const cells = values.map(row);
     x_label = x_label.map((l, i) => <div key = {i}><InlineMath math = {
-                          l
-                        } /></div>);
+                            l
+                          } /></div>);
 
     y_label = y_label.map((l, i) => <div key = {i}><InlineMath math = {
-                          l
-                        } /></div>);
+                            l
+                          } /></div>);
 
-    const marking = ([x, y],i) =>
-        <rect key={i} x = {x* dx} y = {y* dy}
-          width = {dx +1} height = {dy +1} className={'marking'} />;
+    const marking = ([x, y], i) =>
+        <rect key = {i} x = {x* dx} y = {y* dy} width = {dx + 1} height =
+             {dy + 1} className = {'marking'}>
+        <title>{values[y][x].toFixed(precision)}</title></rect>;
     markings = markings.map(marking);
 
 
     return (
         <div id = {id} className = 'activation-dash'>
-        <div className = {'y-label'}>{y_label}</div>
+        <div className = {'y-label'}>{y_label}<
+            /div>
         <svg ref={this.updateSize.bind(this)} preserveAspectRatio = 'none' width = '100%' height =
              '100%'>{
             cells}
@@ -119,6 +127,11 @@ ActivationDashComponent.propTypes = {
    * LaTeX labels for y axis
    */
   ylabel: PropTypes.array,
+
+  /**
+   * Number of digits to show
+   */
+  precision: PropTypes.number,
 
   /**
    * The value displayed in the input.
