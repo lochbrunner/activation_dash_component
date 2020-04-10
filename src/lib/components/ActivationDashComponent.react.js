@@ -25,9 +25,11 @@ function create_dummy_markings() {
 }
 
 function encode_color(value, min, max) {
-  const v = (value - min) / (max - min) * 255;
-  const s = v.toFixed(2);
-  return `rgb(${s}, ${s}, ${s})`;
+  const v = (value - min) / (max - min);
+  const v1 = (v * 255).toFixed(2);
+  // const v5 = (v * v * v * v * v * 255).toFixed(2);
+  // const v3 = (v * v * v * 255).toFixed(2);
+  return `rgb(${v1}, ${v1}, ${v1})`;
 }
 /**
  * ExampleComponent is an example component.
@@ -44,7 +46,6 @@ export default class ActivationDashComponent extends Component {
 
   updateSize(element) {
     if (!element) return;
-    // console.info(`${element.clientWidth}x${element.clientHeight}`);
     const old = this.state.svg;
     if (old.width !== element.clientWidth ||
         old.height !== element.clientHeight) {
@@ -62,36 +63,41 @@ export default class ActivationDashComponent extends Component {
     precision = precision || (data && data.precision) || 3;
     markings = markings || (data && data.markings) || create_dummy_markings();
     const {svg} = this.state;
-    console.log(`svg: ${svg.width}x${svg.height}`);
 
     const min_value =
         values.reduce((p, v) => Math.min(p, ...v), Number.MAX_VALUE);
     const max_value =
         values.reduce((p, v) => Math.max(p, ...v), Number.MIN_VALUE);
-    console.info(`min: ${min_value} max: ${max_value}`);
     const WIDTH = svg.width || 100;
     const HEIGHT = svg.height || 100;
-    const dx = WIDTH / values[0].length;
+    const num_columns = values[0].length;
+    const dx = WIDTH / num_columns;
     const dy = HEIGHT / values.length;
 
     const row = (values, i) => values.map(
         (value, j) =>
-            <rect key = {`${i}-${j}`} x = {j* dx} y = {i* dy} width =
-                 {dx + 0.5} height = {dy + 0.5} fill = {encode_color(
-                     value, min_value, max_value)}>
+            <rect key = {`${i}-${j}`} x = {(j * dx).toFixed(
+                 2)} y = {(i * dy).toFixed(2)} width = {dx + 0.5} height =
+                 {dy + 0.5} fill = {encode_color(value, min_value, max_value)}>
         <title>{value.toFixed(precision)}</title>
           </rect>);
 
-    const Y_LABEL_WIDTH = 50 + dx / 2;
+    const Y_LABEL_WIDTH = -dx * 0.9;
 
     const cells = values.map(row);
-    x_label = x_label.map((l, i) => <div style = {
-                            { left: `${i * dx * 0.87 + Y_LABEL_WIDTH}px` }
-                          } key = {i}><InlineMath math = {
-                            l
-                          } /></div>);
+    x_label =
+        x_label.map((l, i) => <div style = {
+                      { right: `${(num_columns - i) * dx + Y_LABEL_WIDTH}px` }
+                    } key = {i}><InlineMath math = {
+                      l
+                    } /></div>);
 
-    y_label = y_label.map((l, i) => <div key = {i}><InlineMath math = {
+    y_label = y_label.map((l, i) => <div key = {i} style = {
+                            {
+                              top: `${dy * i + dy / 2}px`,
+                                  bottom: `${HEIGHT - dy * i}px`
+                            }
+                          }><InlineMath math = {
                             l
                           } /></div>);
 
@@ -104,12 +110,10 @@ export default class ActivationDashComponent extends Component {
 
     return (
         <div id = {id} className = 'activation-dash'>
-        <div className = {'y-label'}>{y_label}<
-            /div>
-        <svg ref={this.updateSize.bind(this)} preserveAspectRatio = 'none' height =
-             '100%'>{
-            cells}
-            {markings}</svg>
+        <svg ref = {this.updateSize.bind(this)} preserveAspectRatio =
+             'none' height = '100%'>{cells} {
+            markings}</svg>
+        <div className = {'y-label'}>{y_label}</div>
         <div className = {'x-label'}>{x_label}</div>
         </div>);
   }

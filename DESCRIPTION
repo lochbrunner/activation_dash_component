@@ -1,6 +1,6 @@
 Package: activationDashComponent
 Title: Displays a activation layer
-Version: 0.0.3
+Version: 0.0.4
 Authors @R: as.person(c(Matthias Lochbrunner <matthias_lochbrunner@web.de>))
 Description: Displays a activation layer
 Depends: R (>= 3.0.2)
