@@ -28,11 +28,15 @@ function create_dummy_markings() {
 
 function encode_color(value, min, max, exponent) {
   const v = (value - min) / (max - min);
-  const v1 = (Math.pow(v, exponent) * 255).toFixed(2);
+  // const n = (Math.exp(v) - 1) / (Math.exp(1) - 1)
+  const n = Math.pow(v, exponent);
+  const v1 = (n * 255).toFixed(2);
   // const v5 = (v * v * v * v * v * 255).toFixed(2);
   // const v3 = (v * v * v * 255).toFixed(2);
   return `rgb(${v1}, ${v1}, ${v1})`;
 }
+
+
 /**
  * ExampleComponent is an example component.
  * It takes a property, `label`, and
@@ -44,6 +48,32 @@ export default class ActivationDashComponent extends Component {
   constructor(props) {
     super(props);
     this.state = {svg: {width: undefined, height: undefined}, colorScale: 1};
+    this.cache = {values: null, indices: null};
+  }
+
+  attach_indices(array2d) {
+    if (array2d === this.cache.values) return this.cache.indices;
+    let all_tuples = [];
+    const height = array2d.length;
+    const width = array2d[0].length;
+    for (let y = 0; y < height; ++y) {
+      const row = array2d[y];
+      for (let x = 0; x < width; ++x) {
+        all_tuples.push([x, y, row[x]]);
+      }
+    }
+
+    all_tuples.sort((a, b) => a[2] < b[2] ? 1 : -1);
+    this.cache.indices =
+        Array.apply(null, new Array(height))
+            .map(_ => Array.apply(null, new Array(width)).map(_ => null));
+
+    for (let n in all_tuples) {
+      const [x, y, v] = all_tuples[n];
+      this.cache.indices[y][x] = [n, v];
+    }
+
+    return this.cache.indices;
   }
 
   updateSize(element) {
@@ -86,18 +116,20 @@ export default class ActivationDashComponent extends Component {
     const dx = WIDTH / num_columns;
     const dy = HEIGHT / values.length;
 
+    const title = ([index, value]) => `${value.toFixed(precision)} \n#${index}`;
+
     const row = (values, i) => values.map(
-        (value, j) =>
+        ([index, value], j) =>
             <rect key = {`${i}-${j}`} x = {(j * dx).toFixed(
-                 2)} y = {(i * dy).toFixed(2)} width = {dx + 0.5} height =
-                 {dy + 0.5} fill = {encode_color(
+                 2)} y = {(i * dy).toFixed(2)} width = {dx + 1.0} height =
+                 {dy + 1.0} fill = {encode_color(
                      value, min_value, max_value, this.state.colorScale)}>
-        <title>{value.toFixed(precision)}</title>
+        <title>{title([index, value])}</title>
           </rect>);
 
-    const Y_LABEL_WIDTH = -dx * 0.4;
-
-    const cells = values.map(row);
+    const Y_LABEL_WIDTH = -dx * 0.1;
+    const indicted_values = this.attach_indices(values);
+    const cells = indicted_values.map(row);
     x_label =
         x_label.map((l, i) => <div style = {
                       { right: `${(num_columns - i) * dx + Y_LABEL_WIDTH}px` }
@@ -117,7 +149,7 @@ export default class ActivationDashComponent extends Component {
     const marking = ([x, y], i) =>
         <rect key = {i} x = {x* dx} y = {y* dy} width = {dx + 1} height =
              {dy + 1} className = {'marking'}>
-        <title>{values[y][x].toFixed(precision)}</title></rect>;
+        <title>{title(indicted_values[y][x])}</title></rect>;
     markings = markings.map(marking);
 
 
@@ -130,7 +162,7 @@ export default class ActivationDashComponent extends Component {
         <div className = {'x-label'}>{x_label}<
             /div>
         <div className={'side-menu'}>
-            <Slider className={'color-scale'} vertical={true} onChange={this.updateColorScale.bind(this)} min={1} max={10}/>
+            <Slider className={'color-scale'} vertical={true} onChange={this.updateColorScale.bind(this)} min={1} max={50}/>
         </div>
         </div>);
   }
